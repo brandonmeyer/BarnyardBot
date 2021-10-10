@@ -16,7 +16,7 @@ Reports:
 - [Status](status.html)
 - [Final](final.html)
 
-Office Hours Meeting: October 21 at 5:45pm on [Zoom][quickref]
+Office Hours Meeting: October 21 at 5:45pm on [Zoom][quickref].
 [quickref]: https://uci.zoom.us/j/98620593830
 
 Just getting started with Markdown?
