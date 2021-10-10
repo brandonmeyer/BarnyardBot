@@ -3,7 +3,7 @@ layout: default
 title:  Home
 ---
 
-Source code: https://github.com/brandonmeyer/animal-ai (_fix this_)
+Source code: https://github.com/brandonmeyer/animal-ai
 
 Reports:
 
