@@ -6,11 +6,11 @@ title:  Team
 # {{ page.title }}
 
 
-## USER 1
+## Brandon Meyer
 ***UCI Net ID***: bameyer
 
-## USER 2
+## Adarsh Shankar
 ***UCI Net ID***: shankar1
 
-## USER 3
+## Jason Tran
 ***UCI Net ID***: jasont12
