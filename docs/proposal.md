@@ -8,8 +8,10 @@ Gathering resources from farm animals in *Minecraft* can be tedious. When a play
 
 
 ## Algorithms
+Reinforcement learning with actor critic policy gradient will help the agent determine which tools to use (for example, shears should be used if a sheep is seen).
 
 ## Evaluation Plan
+
 
 ## Appointment
 10/21/21 at 7:30pm
