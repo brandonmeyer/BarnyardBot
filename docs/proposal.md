@@ -15,4 +15,4 @@ Quantitative evaluation for the project will focus on items harvested and points
 Sanity cases for qualitative evaluation will include viewing the state/action table and analyzing the values for each entry. If the algorithm is working correctly, the state/action pairs that correlate to real player behavior will reflect the expected results. For example, the entry for switching to shears when a sheep is seen should be high if shears are not currently in the hand, but low if the agent is already holding shears. In addition, the project will be evaluated for unnecessary actions that are taken before harvesting resources from an animal. The moonshot case for this project is that the agent will always respond to the current state with the optimal move, and never execute unnecessary actions. This would minimize the time required to harvest items and maximize the item/reward output.
 
 ## Appointment
-10/21/21 at 7:30pm
+Tuesday, 10/19/21, at 7:30pm
