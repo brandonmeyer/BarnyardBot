@@ -19,14 +19,12 @@ from __future__ import division
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # ------------------------------------------------------------------------------------------------
 
-# Tutorial sample #3: Drawing
-
 from builtins import range
-from past.utils import old_div
 from malmo import MalmoPython
 import os
 import sys
 import time
+import numpy as np
 
 if sys.version_info[0] == 2:
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
@@ -34,75 +32,61 @@ else:
     import functools
     print = functools.partial(print, flush=True)
 
-def Menger(xorg, yorg, zorg, size, blocktype, holetype):
-    #draw solid chunk
-    genstring = GenCuboid(xorg,yorg,zorg,xorg+size-1,yorg+size-1,zorg+size-1,blocktype) + "\n"
-    #now remove holes
-    unit = size
-    while (unit >= 3):
-        w=old_div(unit,3)
-        for i in range(0, size, unit):
-            for j in range(0, size, unit):
-                x=xorg+i
-                y=yorg+j
-                genstring += GenCuboid(x+w,y+w,zorg,(x+2*w)-1,(y+2*w)-1,zorg+size-1,holetype) + "\n"
-                y=yorg+i
-                z=zorg+j
-                genstring += GenCuboid(xorg,y+w,z+w,xorg+size-1, (y+2*w)-1,(z+2*w)-1,holetype) + "\n"
-                genstring += GenCuboid(x+w,yorg,z+w,(x+2*w)-1,yorg+size-1,(z+2*w)-1,holetype) + "\n"
-        unit = w
-    return genstring
-
-def GenCuboid(x1, y1, z1, x2, y2, z2, blocktype):
-    return '<DrawCuboid x1="' + str(x1) + '" y1="' + str(y1) + '" z1="' + str(z1) + '" x2="' + str(x2) + '" y2="' + str(y2) + '" z2="' + str(z2) + '" type="' + blocktype + '"/>'
+targetWool="BLUE"
+totalReward = 0
+action_dict = {
+    0: 'move 1',  # Move one block forward
+    1: 'turn 1',  # Turn 90 degrees to the right
+    2: 'turn -1',  # Turn 90 degrees to the left
+    3: 'attack 1',  # Attack with item
+    4: 'use 1', # Use item
+}
     
 missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
             <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             
-              <About>
-                <Summary>Hello world!</Summary>
-              </About>
+                <About>
+                    <Summary>AnimalAI: Project for collecting resouces from animals in Minecraft</Summary>
+                </About>
               
             <ServerSection>
-              <ServerInitialConditions>
-                <Time>
-                    <StartTime>12000</StartTime>
-                    <AllowPassageOfTime>false</AllowPassageOfTime>
-                </Time>
-                <Weather>clear</Weather>
-                <AllowSpawning>false</AllowSpawning>
-              </ServerInitialConditions>
-              <ServerHandlers>
-                  <FlatWorldGenerator generatorString="2;7,2x3,2;1;"/>
-                  <DrawingDecorator>
-                    <DrawCuboid x1="-6" y1="4" z1="-6" x2="6" y2="4" z2="6" type="fence"/>
-                    <DrawCuboid x1="-5" y1="4" z1="-5" x2="5" y2="4" z2="5" type="air"/>
-                    <DrawEntity x="2" y="4" z="0" type="Cow"/>
-                    <DrawEntity x="2" y="4" z="0" type="Cow"/>
-                    <DrawEntity x="2" y="4" z="0" type="Cow"/>
-                    <DrawEntity x="2" y="4" z="0" type="Cow"/>
-                    <DrawEntity x="2" y="4" z="0" type="Cow"/>
-                    <DrawEntity x="2" y="4" z="0" type="Sheep"/>
-                    <DrawEntity x="2" y="4" z="0" type="Sheep"/>
-                    <DrawEntity x="2" y="4" z="0" type="Sheep"/>
-                    <DrawEntity x="2" y="4" z="0" type="Sheep"/>
-                    <DrawEntity x="2" y="4" z="0" type="Sheep"/>
-                  </DrawingDecorator>
-                  <ServerQuitFromTimeUp timeLimitMs="30000"/>
-                  <ServerQuitWhenAnyAgentFinishes/>
+                <ServerInitialConditions>
+                    <Time>
+                        <StartTime>6000</StartTime>
+                        <AllowPassageOfTime>false</AllowPassageOfTime>
+                    </Time>
+                    <Weather>clear</Weather>
+                    <AllowSpawning>false</AllowSpawning>
+                </ServerInitialConditions>
+                <ServerHandlers>
+                    <FlatWorldGenerator generatorString="2;7,2x3,2;1;"/>
+                    <DrawingDecorator>
+                        <DrawCuboid x1="-6" y1="4" z1="-6" x2="6" y2="4" z2="6" type="fence"/>
+                        <DrawCuboid x1="-5" y1="4" z1="-5" x2="5" y2="4" z2="5" type="air"/>
+                    </DrawingDecorator>
+                    <ServerQuitFromTimeUp timeLimitMs="30000"/>
+                    <ServerQuitWhenAnyAgentFinishes/>
                 </ServerHandlers>
-              </ServerSection>
-              
-              <AgentSection mode="Survival">
-                <Name>MalmoTutorialBot</Name>
-                <AgentStart>
-                    <Placement x="0" y="4.0" z="0" yaw="90"/>
-                </AgentStart>
-                <AgentHandlers>
-                  <ObservationFromFullStats/>
-                  <ContinuousMovementCommands turnSpeedDegs="180"/>
-                </AgentHandlers>
-              </AgentSection>
+            </ServerSection>
+                <AgentSection mode="Survival">
+                    <Name>MalmoTutorialBot</Name>
+                    <AgentStart>
+                        <Placement x="0" y="4.0" z="0" yaw="90"/>
+                        <Inventory>
+                            <InventoryItem slot="0" type="shears"/>
+                            <InventoryItem slot="1" type="bucket"/>
+                        </Inventory>
+                    </AgentStart>
+                    <AgentHandlers>
+                        <ObservationFromFullStats/>
+                        <ContinuousMovementCommands turnSpeedDegs="180"/>
+                        <ChatCommands />
+                        <RewardForCollectingItem>
+                            <Item type="wool" colour="''' + str(targetWool) + '''" reward="1"/>
+                            <Item type="milk_bucket" reward="1"/>
+                        </RewardForCollectingItem>
+                    </AgentHandlers>
+                </AgentSection>
             </Mission>'''
 
 # Create default Malmo objects:
@@ -137,23 +121,50 @@ for retry in range(max_retries):
 # Loop until mission starts:
 print("Waiting for the mission to start ", end=' ')
 world_state = agent_host.getWorldState()
+
 while not world_state.has_mission_begun:
     print(".", end="")
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
         print("Error:",error.text)
-
 print()
 print("Mission running ", end=' ')
 
+# Adjust the tick speed so grass grows back quicker and sheep eat quicker
+agent_host.sendCommand("chat /gamerule randomTickSpeed 20")
+
+# Spawn 8 sheep with a given color at random locations
+def spawnSheep(colorString):
+    for _ in range(8):
+        x = np.random.randint(-5,5)
+        z = np.random.randint(-5,5)
+        agent_host.sendCommand("chat {}".format('/summon minecraft:sheep ' + str(x) + ' 4 ' + str(z) + ' {Color:' + str(colorString) + '}'))
+
+# Spawn 8 cows at random locations
+def spawnCows():
+    for _ in range(8):
+        x = np.random.randint(-5,5)
+        z = np.random.randint(-5,5)
+        agent_host.sendCommand("chat {}".format('/summon minecraft:cow ' + str(x) + ' 4 ' + str(z)))
+
+spawnSheep(11) # blue
+spawnSheep(14) # red
+spawnCows()
+
 # Loop until mission ends:
 while world_state.is_mission_running:
-    print(".", end="")
     time.sleep(0.1)
     world_state = agent_host.getWorldState()
     for error in world_state.errors:
         print("Error:",error.text)
+
+    # Print the total reward
+    reward = 0
+    for r in world_state.rewards:
+        reward += r.getValue()
+    totalReward += reward
+    print(totalReward)
 
 print()
 print("Mission ended")
