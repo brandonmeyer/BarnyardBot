@@ -25,6 +25,7 @@ import os
 import sys
 import time
 import numpy as np
+import json
 
 if sys.version_info[0] == 2:
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)  # flush print output immediately
@@ -83,8 +84,11 @@ missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
                         <ChatCommands />
                         <RewardForCollectingItem>
                             <Item type="wool" colour="''' + str(targetWool) + '''" reward="1"/>
-                            <Item type="milk_bucket" reward="1"/>
+                            <Item type="leather" reward="-1"/>
+                            <Item type="beef" reward="-1"/>
+                            <Item type="mutton" reward="-1"/>
                         </RewardForCollectingItem>
+                        <ObservationFromHotBar/>
                     </AgentHandlers>
                 </AgentSection>
             </Mission>'''
@@ -159,12 +163,23 @@ while world_state.is_mission_running:
     for error in world_state.errors:
         print("Error:",error.text)
 
-    # Print the total reward
+    # Print the total reward if it has changed
     reward = 0
     for r in world_state.rewards:
         reward += r.getValue()
-    totalReward += reward
-    print(totalReward)
+    if (reward != 0):
+        totalReward += reward
+        print(totalReward)
+
+    # Check hotbar for milk if observations have been made
+    if world_state.number_of_observations_since_last_state > 0:
+        obsText = world_state.observations[-1].text
+        obsJson = json.loads(obsText)
+        if (obsJson['Hotbar_1_item'] == 'milk_bucket'): # If the agent has milk, add a point and replace the bucket
+            totalReward += 1
+            print(totalReward)
+            agent_host.sendCommand("chat /replaceitem entity @p slot.hotbar.1 minecraft:bucket")
+            time.sleep(0.1) # Allow time for the item to be replaced (prevents scoring multiple points)
 
 print()
 print("Mission ended")
