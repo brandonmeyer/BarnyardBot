@@ -33,16 +33,19 @@ else:
     import functools
     print = functools.partial(print, flush=True)
 
+# Variables
 targetWool="BLUE"
 totalReward = 0
 action_dict = {
     0: 'move 1',  # Move one block forward
     1: 'turn 1',  # Turn 90 degrees to the right
     2: 'turn -1',  # Turn 90 degrees to the left
-    3: 'attack 1',  # Attack with item
-    4: 'use 1', # Use item
+    3: 'use 1', # Use item
+    4: 'hotbar.1 1', # Swap to first hotbar slot
+    5: 'hotbar.2 1' # Swap to second hotbar slot
 }
-    
+
+# Malmo setup XML
 missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
             <Mission xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             
@@ -72,7 +75,7 @@ missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
                 <AgentSection mode="Survival">
                     <Name>MalmoTutorialBot</Name>
                     <AgentStart>
-                        <Placement x="0" y="4.0" z="0" yaw="90"/>
+                        <Placement x="0" y="4.0" z="0" pitch="30" yaw="90"/>
                         <Inventory>
                             <InventoryItem slot="0" type="shears"/>
                             <InventoryItem slot="1" type="bucket"/>
@@ -82,6 +85,7 @@ missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
                         <ObservationFromFullStats/>
                         <ContinuousMovementCommands turnSpeedDegs="180"/>
                         <ChatCommands />
+                        <InventoryCommands/>
                         <RewardForCollectingItem>
                             <Item type="wool" colour="''' + str(targetWool) + '''" reward="1"/>
                             <Item type="leather" reward="-1"/>
@@ -94,7 +98,6 @@ missionXML='''<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
             </Mission>'''
 
 # Create default Malmo objects:
-
 agent_host = MalmoPython.AgentHost()
 try:
     agent_host.parse( sys.argv )
@@ -135,7 +138,7 @@ while not world_state.has_mission_begun:
 print()
 print("Mission running ", end=' ')
 
-# Adjust the tick speed so grass grows back quicker and sheep eat quicker
+# Adjust the tick speed after the mission starts so grass grows back quicker and sheep eat quicker
 agent_host.sendCommand("chat /gamerule randomTickSpeed 20")
 
 # Spawn 8 sheep with a given color at random locations
@@ -156,6 +159,12 @@ spawnSheep(11) # blue
 spawnSheep(14) # red
 spawnCows()
 
+# Choose a random action from action_dict
+# Adjust this once the learning algorithm has been written
+def step(action_dict):
+    action = np.random.randint(0,6)
+    agent_host.sendCommand(action_dict[action])
+
 # Loop until mission ends:
 while world_state.is_mission_running:
     time.sleep(0.1)
@@ -163,13 +172,8 @@ while world_state.is_mission_running:
     for error in world_state.errors:
         print("Error:",error.text)
 
-    # Print the total reward if it has changed
-    reward = 0
-    for r in world_state.rewards:
-        reward += r.getValue()
-    if (reward != 0):
-        totalReward += reward
-        print(totalReward)
+    # Choose an action and take a step
+    step(action_dict)
 
     # Check hotbar for milk if observations have been made
     if world_state.number_of_observations_since_last_state > 0:
@@ -180,6 +184,14 @@ while world_state.is_mission_running:
             print(totalReward)
             agent_host.sendCommand("chat /replaceitem entity @p slot.hotbar.1 minecraft:bucket")
             time.sleep(0.1) # Allow time for the item to be replaced (prevents scoring multiple points)
+
+    # Check the wool collection rewards and print if reward has changed
+    reward = 0
+    for r in world_state.rewards:
+        reward += r.getValue()
+    if (reward != 0):
+        totalReward += reward
+        print(totalReward)
 
 print()
 print("Mission ended")
