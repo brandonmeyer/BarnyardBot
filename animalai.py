@@ -88,9 +88,6 @@ class AnimalAI(gym.Env):
                                 <InventoryCommands/>
                                 <RewardForCollectingItem>
                                     <Item type="wool" colour="''' + str(self.targetWool) + '''" reward="1"/>
-                                    <Item type="leather" reward="-1"/>
-                                    <Item type="beef" reward="-1"/>
-                                    <Item type="mutton" reward="-1"/>
                                 </RewardForCollectingItem>
                                 <ObservationFromFullStats/>
                                 <ObservationFromHotBar/>
@@ -235,10 +232,16 @@ class AnimalAI(gym.Env):
         if world_state.number_of_observations_since_last_state > 0:
             obsText = world_state.observations[-1].text
             obsJson = json.loads(obsText)
-            if (obsJson['Hotbar_1_item'] == 'milk_bucket'): # If the agent has milk, add a point and replace the bucket
+            if (obsJson['Hotbar_1_item'] == 'milk_bucket'):
+                 # If the agent has milk, add a point and replace the bucket
                 reward += 1
                 self.agent_host.sendCommand("chat /replaceitem entity @p slot.hotbar.1 minecraft:bucket")
                 time.sleep(0.1) # Allow time for the item to be replaced (prevents scoring multiple points)
+
+                # Kill all cows and spawn them in a new location so the agent can't keep milking the same cow
+                self.agent_host.sendCommand("chat /kill @e[type=cow]")
+                self.agent_host.sendCommand("chat /kill @e[type=item]")
+                self.spawnCows()
         self.obs = self.getObservation(world_state)
 
         # Check the wool collection rewards and print if reward has changed
