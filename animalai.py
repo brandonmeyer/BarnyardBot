@@ -21,7 +21,7 @@ class AnimalAI(gym.Env):
         self.rewardList = []
         self.obs_size = 5
         self.obs = None
-        self.action_dict = {
+        self.discrete_action_dict = {
             0: 'move 1',  # Move one block forward
             1: 'turn 1',  # Turn 90 degrees to the right
             2: 'turn -1',  # Turn 90 degrees to the left
@@ -40,7 +40,11 @@ class AnimalAI(gym.Env):
             exit(1)
 
         # RLLib objects
-        self.action_space = Discrete(len(self.action_dict))
+        # Continuous action space: [move, turn, hotbar, use]: hotbar < 0 = hotbar1, hotbar > 0 = hotbar2
+        self.action_space = Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
+        # Discrete action space
+        # self.action_space= Discrete(len(self.discrete_action_dict))
+        # Observation space: update for vision
         self.observation_space = Box(0, 1, shape=(2 * self.obs_size * self.obs_size, ), dtype=np.float32)
 
     ###########################################################################
@@ -66,8 +70,8 @@ class AnimalAI(gym.Env):
                         <ServerHandlers>
                             <FlatWorldGenerator generatorString="2;7,2x3,2;1;"/>
                             <DrawingDecorator>
-                                <DrawCuboid x1="-6" y1="4" z1="-6" x2="6" y2="4" z2="6" type="fence"/>
-                                <DrawCuboid x1="-5" y1="4" z1="-5" x2="5" y2="4" z2="5" type="air"/>
+                                <DrawCuboid x1="-8" y1="4" z1="-8" x2="8" y2="4" z2="8" type="fence"/>
+                                <DrawCuboid x1="-7" y1="4" z1="-7" x2="7" y2="4" z2="7" type="air"/>
                             </DrawingDecorator>
                             <ServerQuitFromTimeUp timeLimitMs="30000"/>
                             <ServerQuitWhenAnyAgentFinishes/>
@@ -143,6 +147,9 @@ class AnimalAI(gym.Env):
         self.spawnSheep(14) # red
         self.spawnCows()
 
+        # Make sure there are no items on the ground
+        self.agent_host.sendCommand("chat /kill @e[type=item]")
+
         world_state = self.agent_host.getWorldState()
         return world_state
 
@@ -206,8 +213,8 @@ class AnimalAI(gym.Env):
     ###########################################################################
     def spawnSheep(self, colorString):
         for _ in range(8):
-            x = np.random.randint(-5,5)
-            z = np.random.randint(-5,5)
+            x = np.random.randint(-7,7)
+            z = np.random.randint(-7,7)
             self.agent_host.sendCommand("chat {}".format('/summon minecraft:sheep ' + str(x) + ' 4 ' + str(z) + ' {Color:' + str(colorString) + '}'))
 
     ###########################################################################
@@ -215,16 +222,37 @@ class AnimalAI(gym.Env):
     ###########################################################################
     def spawnCows(self):
         for _ in range(8):
-            x = np.random.randint(-5,5)
-            z = np.random.randint(-5,5)
+            x = np.random.randint(-7,7)
+            z = np.random.randint(-7,7)
             self.agent_host.sendCommand("chat {}".format('/summon minecraft:cow ' + str(x) + ' 4 ' + str(z)))
 
     ###########################################################################
-    # Choose a random action from action_dict
-    # Adjust this once the learning algorithm has been written
+    # Execute the continuous action
     ###########################################################################
     def step(self, action):
-        self.agent_host.sendCommand(self.action_dict[action])
+        # action = [move, turn, hotbar, use]
+        # move
+        self.agent_host.sendCommand('move ' + str(action[0]))
+
+        # turn
+        self.agent_host.sendCommand('turn ' + str(action[1]))
+
+        # hotbar, if <= 0 press hotbar 1, if > 0 press hotbar 2
+        if (action[2] <= 0):
+            self.agent_host.sendCommand('hotbar.1 1')
+        else:
+            self.agent_host.sendCommand('hotbar.2 1')
+
+        # use
+        if (action[3] <= 0):
+            self.agent_host.sendCommand('use 0')
+        else:
+            self.agent_host.sendCommand('use 1')
+
+        # Give the agent time to execute the action
+        time.sleep(0.3)
+        
+        # Calculate reward
         reward = 0
 
         # Check hotbar for milk if observations have been made
@@ -240,7 +268,6 @@ class AnimalAI(gym.Env):
 
                 # Kill all cows and spawn them in a new location so the agent can't keep milking the same cow
                 self.agent_host.sendCommand("chat /kill @e[type=cow]")
-                self.agent_host.sendCommand("chat /kill @e[type=item]")
                 self.spawnCows()
         self.obs = self.getObservation(world_state)
 
@@ -250,12 +277,14 @@ class AnimalAI(gym.Env):
         self.totalReward += reward
         print(reward)
 
+        # Check if the mission is still running
         done = not world_state.is_mission_running
 
         return self.obs, reward, done, dict()
 
 if __name__ == '__main__':
     ray.init()
+    # Change from ppo??
     trainer = ppo.PPOTrainer(env=AnimalAI, config={
         'env_config': {},           # No environment parameters to configure
         'framework': 'torch',       # Use pyotrch instead of tensorflow
