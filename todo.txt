@@ -1,0 +1,9 @@
+TODO LIST
+
+- Update observation space to use vision/mob detection
+- Add logging for progress report
+- Choose a new algorithm (https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD) and switch from PPO to chosen algorithm
+- Write progress report/record video
+- Add player input to alter agent behavior
+- Make presentation
+- Write final report
