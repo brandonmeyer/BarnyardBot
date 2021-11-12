@@ -1,9 +1,11 @@
 from builtins import range
+
 from malmo import MalmoPython
 import os
 import sys
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 import json
 import gym, ray
 from gym.spaces import Discrete, Box
@@ -19,7 +21,7 @@ class AnimalAI(gym.Env):
         self.targetWool="BLUE" # Current wool to reward
         self.totalReward = 0 # Current Reward Total
         self.rewardList = []
-        self.obs_size = 5
+        self.obs_size = 16
         self.obs = None
         self.discrete_action_dict = {
             0: 'move 1',  # Move one block forward
@@ -44,8 +46,8 @@ class AnimalAI(gym.Env):
         self.action_space = Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
         # Discrete action space
         # self.action_space= Discrete(len(self.discrete_action_dict))
-        # Observation space: update for vision
-        self.observation_space = Box(0, 1, shape=(2 * self.obs_size * self.obs_size, ), dtype=np.float32)
+        # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
+        self.observation_space = Box(low=0, high=4, shape=(self.obs_size * self.obs_size, ), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -70,17 +72,17 @@ class AnimalAI(gym.Env):
                         <ServerHandlers>
                             <FlatWorldGenerator generatorString="2;7,2x3,2;1;"/>
                             <DrawingDecorator>
-                                <DrawCuboid x1="-8" y1="4" z1="-8" x2="8" y2="4" z2="8" type="fence"/>
-                                <DrawCuboid x1="-7" y1="4" z1="-7" x2="7" y2="4" z2="7" type="air"/>
+                                <DrawCuboid x1="-1" y1="4" z1="-1" x2="15" y2="4" z2="15" type="fence"/>
+                                <DrawCuboid x1="0" y1="4" z1="0" x2="14" y2="4" z2="14" type="air"/>
                             </DrawingDecorator>
                             <ServerQuitFromTimeUp timeLimitMs="30000"/>
                             <ServerQuitWhenAnyAgentFinishes/>
                         </ServerHandlers>
                     </ServerSection>
                         <AgentSection mode="Survival">
-                            <Name>MalmoTutorialBot</Name>
+                            <Name>AnimalAIBot</Name>
                             <AgentStart>
-                                <Placement x="0" y="4.0" z="0" pitch="30" yaw="90"/>
+                                <Placement x="7.5" y="4" z="7.5" pitch="30" yaw="0"/>
                                 <Inventory>
                                     <InventoryItem slot="0" type="shears"/>
                                     <InventoryItem slot="1" type="bucket"/>
@@ -96,12 +98,9 @@ class AnimalAI(gym.Env):
                                 <ObservationFromFullStats/>
                                 <ObservationFromHotBar/>
                                 <ObservationFromRay/>
-                                <ObservationFromGrid>
-                                    <Grid name="animalLevel">
-                                        <min x="-'''+str(int(self.obs_size/2))+'''" y="3" z="-'''+str(int(self.obs_size/2))+'''"/>
-                                        <max x="'''+str(int(self.obs_size/2))+'''" y="4" z="'''+str(int(self.obs_size/2))+'''"/>
-                                    </Grid>
-                                </ObservationFromGrid>
+                                <ObservationFromNearbyEntities>
+                                    <Range name="entities" xrange="50" yrange="10" zrange="50"/>
+                                </ObservationFromNearbyEntities>
                             </AgentHandlers>
                         </AgentSection>
                     </Mission>'''
@@ -129,7 +128,6 @@ class AnimalAI(gym.Env):
                     time.sleep(2)
 
         # Make sure that mission initializes
-        print("Waiting for the mission to start ", end=' ')
         world_state = self.agent_host.getWorldState()
 
         while not world_state.has_mission_begun:
@@ -137,7 +135,7 @@ class AnimalAI(gym.Env):
             world_state = self.agent_host.getWorldState()
             for error in world_state.errors:
                 print("Error:",error.text)
-        print('Animal AI is running!\n')
+        print('Mission started!\n')
 
         # Adjust the tick speed after the mission starts so grass grows back quicker and sheep eat quicker
         self.agent_host.sendCommand("chat /gamerule randomTickSpeed 20")
@@ -164,6 +162,20 @@ class AnimalAI(gym.Env):
         self.rewardList.append(self.totalReward)
         self.totalReward = 0
 
+        # Log graph
+        if (len(self.rewardList) > 1):
+            plt.clf()
+            plt.plot(self.rewardList)
+            plt.title('ANIMAL AI')
+            plt.ylabel('Return')
+            plt.xlabel('Missions')
+            plt.savefig('animal_returns.png')
+
+        # Log the mission rewards in txt form
+        with open('animalai_returns.txt', 'w') as f:
+            for i,x in enumerate(self.rewardList):
+                f.write("{}\t{}\n".format(i, x))
+
         # Get Observation
         self.obs = self.getObservation(world_state)
 
@@ -174,7 +186,7 @@ class AnimalAI(gym.Env):
     # Change this to return the current view of the agent
     ###########################################################################
     def getObservation(self, world_state):
-        obs = np.zeros((2 * self.obs_size * self.obs_size, ))
+        obs = np.zeros((self.obs_size * self.obs_size, ))
 
         # Loop until mission ends:
         while world_state.is_mission_running:
@@ -187,43 +199,67 @@ class AnimalAI(gym.Env):
                 # First we get the json from the observation API
                 msg = world_state.observations[-1].text
                 observations = json.loads(msg)
+                obs = self.parseObservation(obs, observations['entities'])
 
-                # Get observation
-                grid = observations['animalLevel']
-                for i, x in enumerate(grid):
-                    obs[i] = x == 'fence' # Observe where the fences are
-
-                # Rotate observation with orientation of agent
-                obs = obs.reshape((2, self.obs_size, self.obs_size))
-                yaw = observations['Yaw']
-                if yaw >= 225 and yaw < 315:
-                    obs = np.rot90(obs, k=1, axes=(1, 2))
-                elif yaw >= 315 or yaw < 45:
-                    obs = np.rot90(obs, k=2, axes=(1, 2))
-                elif yaw >= 45 and yaw < 135:
-                    obs = np.rot90(obs, k=3, axes=(1, 2))
-                obs = obs.flatten()
                 
                 break
 
+        # self.printGrid(obs) # optional: print the grid to view the current observation state
         return obs
+
+    ###########################################################################
+    # Parse Observation
+    ###########################################################################
+    def parseObservation(self, obs, entities):
+        # Take entities list and return a grid for the agent
+        for entry in entities:
+            name = entry['name']
+            # convert the x,z coords to an index in the observation grid, 15,15 top left (index 0), 0,0 bottom right
+            index = (self.obs_size * self.obs_size)-1 - round(entry['x']) - (self.obs_size*round(entry['z']))
+            if name == 'Cow':
+                obs[index] = 2
+            elif name == 'Red':
+                obs[index] = 3
+            elif name == 'Blue':
+                obs[index] = 4
+            elif name == 'AnimalAIBot':
+                obs[index] = 1
+        return obs
+
+    ###########################################################################
+    # Print Grid
+    ###########################################################################
+    def printGrid(self, obs):
+        # Print a readable grid from observations
+        count = 0
+        printStr = ""
+        for entry in obs:
+            if (count == self.obs_size):
+                printStr += '\n'
+                count = 0
+            printStr += str(entry) + ' '
+            count += 1
+        print(printStr)
 
     ###########################################################################
     # Spawn 8 sheep with a given color at random locations
     ###########################################################################
     def spawnSheep(self, colorString):
         for _ in range(8):
-            x = np.random.randint(-7,7)
-            z = np.random.randint(-7,7)
-            self.agent_host.sendCommand("chat {}".format('/summon minecraft:sheep ' + str(x) + ' 4 ' + str(z) + ' {Color:' + str(colorString) + '}'))
+            x = np.random.randint(0,14)
+            z = np.random.randint(0,14)
+            name = 'Red'
+            if colorString == 11:
+                name = 'Blue'
+            self.agent_host.sendCommand("chat {}".format('/summon minecraft:sheep ' + str(x) + ' 4 ' + str(z) + ' {CustomName:' + name + ',Color:' + str(colorString) + '}'))
 
     ###########################################################################
     # Spawn 8 cows at random locations
     ###########################################################################
     def spawnCows(self):
         for _ in range(8):
-            x = np.random.randint(-7,7)
-            z = np.random.randint(-7,7)
+            x = np.random.randint(0,14)
+            z = np.random.randint(0,14)
             self.agent_host.sendCommand("chat {}".format('/summon minecraft:cow ' + str(x) + ' 4 ' + str(z)))
 
     ###########################################################################
@@ -275,7 +311,6 @@ class AnimalAI(gym.Env):
         for r in world_state.rewards:
             reward += r.getValue()
         self.totalReward += reward
-        print(reward)
 
         # Check if the mission is still running
         done = not world_state.is_mission_running
