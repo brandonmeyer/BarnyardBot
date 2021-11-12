@@ -201,9 +201,18 @@ class AnimalAI(gym.Env):
                 observations = json.loads(msg)
                 obs = self.parseObservation(obs, observations['entities'])
 
+                obs = obs.reshape((1, self.obs_size, self.obs_size))
+                yaw = observations['Yaw']
+                if (yaw > 45 and yaw <= 135) or (yaw < -225 and yaw >= -315):
+                    obs = np.rot90(obs, k=1, axes=(1, 2))
+                elif (yaw > 135 and yaw <= 225) or (yaw < -135 and yaw >= -225):
+                    obs = np.rot90(obs, k=2, axes=(1, 2))
+                elif (yaw > 225 and yaw <= 315) or (yaw < -45 and yaw >= -135):
+                    obs = np.rot90(obs, k=3, axes=(1, 2))
+                obs = obs.flatten()
                 
                 break
-
+        
         # self.printGrid(obs) # optional: print the grid to view the current observation state
         return obs
 
@@ -239,7 +248,7 @@ class AnimalAI(gym.Env):
                 count = 0
             printStr += str(entry) + ' '
             count += 1
-        print(printStr)
+        print(printStr + '\n')
 
     ###########################################################################
     # Spawn 8 sheep with a given color at random locations
