@@ -7,9 +7,10 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+import math
 import gym, ray
 from gym.spaces import Discrete, Box
-from ray.rllib.agents import ppo
+from ray.rllib.agents import ppo, sac, ddpg
 
 class AnimalAI(gym.Env):
 
@@ -20,9 +21,12 @@ class AnimalAI(gym.Env):
         # Variables
         self.targetWool="BLUE" # Current wool to reward
         self.totalReward = 0 # Current Reward Total
+        self.totalSteps = 0 # Current steps for mission
         self.rewardList = []
+        self.stepList = []
         self.obs_size = 16
         self.obs = None
+        self.view_size = 5
         self.discrete_action_dict = {
             0: 'move 1',  # Move one block forward
             1: 'turn 1',  # Turn 90 degrees to the right
@@ -47,7 +51,7 @@ class AnimalAI(gym.Env):
         # Discrete action space
         # self.action_space= Discrete(len(self.discrete_action_dict))
         # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
-        self.observation_space = Box(low=0, high=4, shape=(self.obs_size * self.obs_size, ), dtype=np.float32)
+        self.observation_space = Box(low=0, high=4, shape=(self.view_size * self.view_size, ), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -82,7 +86,7 @@ class AnimalAI(gym.Env):
                         <AgentSection mode="Survival">
                             <Name>AnimalAIBot</Name>
                             <AgentStart>
-                                <Placement x="7.5" y="4" z="7.5" pitch="30" yaw="0"/>
+                                <Placement x="7.5" y="4" z="7.5" pitch="15" yaw="0"/>
                                 <Inventory>
                                     <InventoryItem slot="0" type="shears"/>
                                     <InventoryItem slot="1" type="bucket"/>
@@ -94,6 +98,7 @@ class AnimalAI(gym.Env):
                                 <InventoryCommands/>
                                 <RewardForCollectingItem>
                                     <Item type="wool" colour="''' + str(self.targetWool) + '''" reward="1"/>
+                                    <Item type="wool" colour="RED" reward="1"/>
                                 </RewardForCollectingItem>
                                 <ObservationFromFullStats/>
                                 <ObservationFromHotBar/>
@@ -160,15 +165,21 @@ class AnimalAI(gym.Env):
 
         # Reset Variables
         self.rewardList.append(self.totalReward)
+        current_step = self.stepList[-1] if len(self.stepList) > 0 else 0
+        self.stepList.append(current_step + self.totalSteps)
+
         self.totalReward = 0
+        self.totalSteps = 0
 
         # Log graph
-        if (len(self.rewardList) > 1):
+        if len(self.rewardList) > 11 and len(self.rewardList) % 10 == 0:
+            box = np.ones(10) / 10
+            returns_smooth = np.convolve(self.rewardList[1:], box, mode='same')
             plt.clf()
-            plt.plot(self.rewardList)
+            plt.plot(self.stepList[1:], returns_smooth)
             plt.title('ANIMAL AI')
             plt.ylabel('Return')
-            plt.xlabel('Missions')
+            plt.xlabel('Steps')
             plt.savefig('animal_returns.png')
 
         # Log the mission rewards in txt form
@@ -187,6 +198,7 @@ class AnimalAI(gym.Env):
     ###########################################################################
     def getObservation(self, world_state):
         obs = np.zeros((self.obs_size * self.obs_size, ))
+        vision = np.zeros((5 * 5, ))
 
         # Loop until mission ends:
         while world_state.is_mission_running:
@@ -201,6 +213,7 @@ class AnimalAI(gym.Env):
                 observations = json.loads(msg)
                 obs = self.parseObservation(obs, observations['entities'])
 
+                # Rotate the observation grid to be facing the same direction as the player
                 obs = obs.reshape((1, self.obs_size, self.obs_size))
                 yaw = observations['Yaw']
                 if (yaw > 45 and yaw <= 135) or (yaw < -225 and yaw >= -315):
@@ -210,11 +223,23 @@ class AnimalAI(gym.Env):
                 elif (yaw > 225 and yaw <= 315) or (yaw < -45 and yaw >= -135):
                     obs = np.rot90(obs, k=3, axes=(1, 2))
                 obs = obs.flatten()
-                
+
+                # Shrink observation grid to 5x5 in front of agent
+                agent_i = np.where(obs == 1)[0][0]
+                agent_z = math.floor(agent_i / self.obs_size)
+                agent_x = agent_i - (self.obs_size * agent_z)
+                for r in range(self.view_size):
+                    for c in range(self.view_size):
+                        target_x = agent_x - math.floor(float(self.view_size) / 2.0) + c
+                        target_z = agent_z - self.view_size + r
+                        if (target_x < self.obs_size and target_z < self.obs_size and target_x >= 0 and target_z >= 0):
+                            target_i = target_x + (self.obs_size * target_z)
+                            vision[c + (self.view_size * r)] = obs[target_i]
                 break
         
-        # self.printGrid(obs) # optional: print the grid to view the current observation state
-        return obs
+        # self.printGrid(obs, self.obs_size) # optional: print the grid to view the current observation state
+        # self.printGrid(vision, self.vision_size) # optional: print the grid to view the current agent vision state
+        return vision
 
     ###########################################################################
     # Parse Observation
@@ -225,25 +250,27 @@ class AnimalAI(gym.Env):
             name = entry['name']
             # convert the x,z coords to an index in the observation grid, 15,15 top left (index 0), 0,0 bottom right
             index = (self.obs_size * self.obs_size)-1 - round(entry['x']) - (self.obs_size*round(entry['z']))
-            if name == 'Cow':
-                obs[index] = 2
-            elif name == 'Red':
-                obs[index] = 3
-            elif name == 'Blue':
-                obs[index] = 4
-            elif name == 'AnimalAIBot':
-                obs[index] = 1
+            if (index < 256 and index >= 0 and obs[index] != 1): # Agent always takes priority, do not write over agent location
+                if name == 'Cow':
+                    obs[index] = 2
+                elif name == 'Red':
+                    obs[index] = 3
+                elif name == 'Blue':
+                    obs[index] = 4
+                elif name == 'AnimalAIBot':
+                    obs[index] = 1
+
         return obs
 
     ###########################################################################
     # Print Grid
     ###########################################################################
-    def printGrid(self, obs):
+    def printGrid(self, obs, size):
         # Print a readable grid from observations
         count = 0
         printStr = ""
         for entry in obs:
-            if (count == self.obs_size):
+            if (count == size):
                 printStr += '\n'
                 count = 0
             printStr += str(entry) + ' '
@@ -307,7 +334,7 @@ class AnimalAI(gym.Env):
             obsJson = json.loads(obsText)
             if (obsJson['Hotbar_1_item'] == 'milk_bucket'):
                  # If the agent has milk, add a point and replace the bucket
-                reward += 1
+                reward += -1
                 self.agent_host.sendCommand("chat /replaceitem entity @p slot.hotbar.1 minecraft:bucket")
                 time.sleep(0.1) # Allow time for the item to be replaced (prevents scoring multiple points)
 
@@ -321,15 +348,19 @@ class AnimalAI(gym.Env):
             reward += r.getValue()
         self.totalReward += reward
 
+        self.totalSteps += 1
+
         # Check if the mission is still running
         done = not world_state.is_mission_running
+
+        print(reward)
 
         return self.obs, reward, done, dict()
 
 if __name__ == '__main__':
     ray.init()
     # Change from ppo??
-    trainer = ppo.PPOTrainer(env=AnimalAI, config={
+    trainer = sac.SACTrainer(env=AnimalAI, config={
         'env_config': {},           # No environment parameters to configure
         'framework': 'torch',       # Use pyotrch instead of tensorflow
         'num_gpus': 0,              # We aren't using GPUs
