@@ -52,7 +52,7 @@ class AnimalAI(gym.Env):
         # Discrete action space
         self.action_space= Discrete(len(self.discrete_action_dict))
         # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
-        self.observation_space = Box(low=0, high=4, shape=(self.view_size * self.view_size, ), dtype=np.float32)
+        self.observation_space = Box(low=0, high=1, shape=(self.view_size * self.view_size, ), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -237,7 +237,7 @@ class AnimalAI(gym.Env):
                 obs = obs.flatten()
 
                 # Shrink observation grid to 5x5 in front of agent
-                agent_i = np.where(obs == 1)[0][0]
+                agent_i = np.where(obs == 2)[0][0]
                 agent_z = math.floor(agent_i / self.obs_size)
                 agent_x = agent_i - (self.obs_size * agent_z)
                 for r in range(self.view_size):
@@ -250,7 +250,7 @@ class AnimalAI(gym.Env):
                 break
         
         # self.printGrid(obs, self.obs_size) # optional: print the grid to view the current observation state
-        # self.printGrid(vision, self.view_size) # optional: print the grid to view the current agent vision state
+        self.printGrid(vision, self.view_size) # optional: print the grid to view the current agent vision state
         return vision
 
     ###########################################################################
@@ -262,15 +262,15 @@ class AnimalAI(gym.Env):
             name = entry['name']
             # convert the x,z coords to an index in the observation grid, 15,15 top left (index 0), 0,0 bottom right
             index = (self.obs_size * self.obs_size)-1 - round(entry['x']) - (self.obs_size*round(entry['z']))
-            if (index < 256 and index >= 0 and obs[index] != 1): # Agent always takes priority, do not write over agent location
+            if (index < 256 and index >= 0 and obs[index] != 2): # Agent always takes priority, do not write over agent location
                 if name == 'Cow':
-                    obs[index] = 2
-                elif name == 'Blue':
-                    obs[index] = 3
-                elif name == 'Red':
-                    obs[index] = 4
-                elif name == 'AnimalAIBot':
                     obs[index] = 1
+                elif name == 'Blue':
+                    obs[index] = 1
+                elif name == 'Red':
+                    obs[index] = 1
+                elif name == 'AnimalAIBot':
+                    obs[index] = 2
 
         return obs
 
@@ -367,7 +367,6 @@ class AnimalAI(gym.Env):
         # Check the wool collection rewards and print if reward has changed
         for r in world_state.rewards:
             reward += r.getValue()
-        self.totalReward += reward
 
         # Check hotbar for milk if observations have been made
         if world_state.number_of_observations_since_last_state > 0:
@@ -384,6 +383,7 @@ class AnimalAI(gym.Env):
                 self.spawnCows()
         self.obs = self.getObservation(world_state)
 
+        self.totalReward += reward
         self.totalSteps += 1
 
         # Check if the mission is still running
@@ -395,7 +395,7 @@ class AnimalAI(gym.Env):
 
 if __name__ == '__main__':
     ray.init()
-    trainer = ppo.PPOTrainer(env=AnimalAI, config={
+    trainer = dqn.DQNTrainer(env=AnimalAI, config={
         'env_config': {},           # No environment parameters to configure
         'framework': 'torch',       # Use pyotrch instead of tensorflow
         'num_gpus': 0,              # We aren't using GPUs
