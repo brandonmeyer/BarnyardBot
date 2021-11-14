@@ -5,7 +5,7 @@ title:  Home
 
 Team Members: Brandon Meyer, Adarsh Shankar, Jason Tran  
 
-Source code: https://github.com/brandonmeyer/BarnyardBot
+Source code: [https://github.com/brandonmeyer/BarnyardBot](https://github.com/brandonmeyer/BarnyardBot)
 
 Reports:
 
