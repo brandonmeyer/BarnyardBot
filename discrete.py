@@ -28,13 +28,16 @@ class AnimalAI(gym.Env):
         self.obs = None
         self.view_size = 5
         self.currentItem = 1
+        self.agent_x = 5.5
+        self.agent_z = 5.5
         self.discrete_action_dict = {
             0: 'move 1',  # Move one block forward
-            1: 'turn 1',  # Turn 90 degrees to the right
-            2: 'turn -1',  # Turn 90 degrees to the left
-            3: 'use 1', # Use item
-            4: 'hotbar.1 1', # Swap to first hotbar slot
-            5: 'hotbar.2 1' # Swap to second hotbar slot
+            1: 'move -1',  # Move back
+            2: 'strafe 1',  # Move right
+            3: 'strafe -1', # Move left
+            4: 'use 1', # Use item
+            5: 'hotbar.1 1', # Swap to first hotbar slot
+            6: 'hotbar.2 1' # Swap to second hotbar slot
         }
 
         # Malmo Objects
@@ -47,12 +50,10 @@ class AnimalAI(gym.Env):
             exit(1)
 
         # RLLib objects
-        # Continuous action space: [move, turn, hotbar, use]: hotbar < 0 = hotbar1, hotbar > 0 = hotbar2
-        # self.action_space = Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
         # Discrete action space
         self.action_space= Discrete(len(self.discrete_action_dict))
         # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
-        self.observation_space = Box(low=0, high=1, shape=(self.view_size * self.view_size, ), dtype=np.float32)
+        self.observation_space = Box(low=0, high=np.array([2, 1]), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -77,8 +78,8 @@ class AnimalAI(gym.Env):
                         <ServerHandlers>
                             <FlatWorldGenerator generatorString="2;7,2x3,2;1;"/>
                             <DrawingDecorator>
-                                <DrawCuboid x1="-1" y1="4" z1="-1" x2="15" y2="4" z2="15" type="fence"/>
-                                <DrawCuboid x1="0" y1="4" z1="0" x2="14" y2="4" z2="14" type="air"/>
+                                <DrawCuboid x1="-1" y1="4" z1="-1" x2="11" y2="4" z2="11" type="fence"/>
+                                <DrawCuboid x1="0" y1="4" z1="0" x2="10" y2="4" z2="10" type="air"/>
                             </DrawingDecorator>
                             <ServerQuitFromTimeUp timeLimitMs="30000"/>
                             <ServerQuitWhenAnyAgentFinishes/>
@@ -87,7 +88,7 @@ class AnimalAI(gym.Env):
                         <AgentSection mode="Survival">
                             <Name>AnimalAIBot</Name>
                             <AgentStart>
-                                <Placement x="7.5" y="4" z="7.5" pitch="22" yaw="0"/>
+                                <Placement x="5.5" y="4" z="5.5" pitch="22" yaw="0"/>
                                 <Inventory>
                                     <InventoryItem slot="0" type="shears"/>
                                     <InventoryItem slot="1" type="bucket"/>
@@ -106,6 +107,7 @@ class AnimalAI(gym.Env):
                                         <command>turn</command>
                                     </ModifierList>
                                 </ContinuousMovementCommands>
+                                <AbsoluteMovementCommands />
                                 <ChatCommands />
                                 <InventoryCommands/>
                                 <RewardForCollectingItem>
@@ -196,8 +198,8 @@ class AnimalAI(gym.Env):
 
         # Log the mission rewards in txt form
         with open('animalai_returns.txt', 'w') as f:
-            for i,x in enumerate(self.rewardList):
-                f.write("{}\t{}\n".format(i, x))
+            for step, value in zip(self.stepList[1:], self.rewardList[1:]):
+                f.write("{}\t{}\n".format(step, value)) 
 
         # Get Observation
         self.obs = self.getObservation(world_state)
@@ -209,8 +211,7 @@ class AnimalAI(gym.Env):
     # Change this to return the current view of the agent
     ###########################################################################
     def getObservation(self, world_state):
-        obs = np.zeros((self.obs_size * self.obs_size, ))
-        vision = np.zeros((5 * 5, ))
+        obs = np.zeros((2, ))
 
         # Loop until mission ends:
         while world_state.is_mission_running:
@@ -223,79 +224,37 @@ class AnimalAI(gym.Env):
                 # First we get the json from the observation API
                 msg = world_state.observations[-1].text
                 observations = json.loads(msg)
-                obs = self.parseObservation(obs, observations['entities'])
-
-                # Rotate the observation grid to be facing the same direction as the player
-                obs = obs.reshape((1, self.obs_size, self.obs_size))
-                yaw = observations['Yaw']
-                if (yaw > 45 and yaw <= 135) or (yaw < -225 and yaw >= -315):
-                    obs = np.rot90(obs, k=1, axes=(1, 2))
-                elif (yaw > 135 and yaw <= 225) or (yaw < -135 and yaw >= -225):
-                    obs = np.rot90(obs, k=2, axes=(1, 2))
-                elif (yaw > 225 and yaw <= 315) or (yaw < -45 and yaw >= -135):
-                    obs = np.rot90(obs, k=3, axes=(1, 2))
-                obs = obs.flatten()
-
-                # Shrink observation grid to 5x5 in front of agent
-                agent_i = np.where(obs == 2)[0][0]
-                agent_z = math.floor(agent_i / self.obs_size)
-                agent_x = agent_i - (self.obs_size * agent_z)
-                for r in range(self.view_size):
-                    for c in range(self.view_size):
-                        target_x = agent_x - math.floor(float(self.view_size) / 2.0) + c
-                        target_z = agent_z - self.view_size + r
-                        if (target_x < self.obs_size and target_z < self.obs_size and target_x >= 0 and target_z >= 0):
-                            target_i = target_x + (self.obs_size * target_z)
-                            vision[c + (self.view_size * r)] = obs[target_i]
+                obs = self.parseObservation(obs, observations['LineOfSight'])
                 break
-        
-        # self.printGrid(obs, self.obs_size) # optional: print the grid to view the current observation state
-        self.printGrid(vision, self.view_size) # optional: print the grid to view the current agent vision state
-        return vision
+        return obs
 
     ###########################################################################
     # Parse Observation
     ###########################################################################
-    def parseObservation(self, obs, entities):
-        # Take entities list and return a grid for the agent
-        for entry in entities:
-            name = entry['name']
-            # convert the x,z coords to an index in the observation grid, 15,15 top left (index 0), 0,0 bottom right
-            index = (self.obs_size * self.obs_size)-1 - round(entry['x']) - (self.obs_size*round(entry['z']))
-            if (index < 256 and index >= 0 and obs[index] != 2): # Agent always takes priority, do not write over agent location
-                if name == 'Cow':
-                    obs[index] = 1
-                elif name == 'Blue':
-                    obs[index] = 1
-                elif name == 'Red':
-                    obs[index] = 1
-                elif name == 'AnimalAIBot':
-                    obs[index] = 2
+    def parseObservation(self, obs, los):
+        # Take line of sight and return what object is visible
+        if los['type'] == 'Cow':
+            obs[0] = 1
+        elif los['type'] == 'Red' or los['type'] == 'Blue':
+            obs[0] = 2
+        else:
+            obs[0] = 0
+
+        # Add the current held item to the observation
+        if self.currentItem == 1:
+            obs[1] = 0
+        else:
+            obs[1] = 1
 
         return obs
-
-    ###########################################################################
-    # Print Grid
-    ###########################################################################
-    def printGrid(self, obs, size):
-        # Print a readable grid from observations
-        count = 0
-        printStr = ""
-        for entry in obs:
-            if (count == size):
-                printStr += '\n'
-                count = 0
-            printStr += str(entry) + ' '
-            count += 1
-        print(printStr + '\n')
 
     ###########################################################################
     # Spawn 8 sheep with a given color at random locations
     ###########################################################################
     def spawnSheep(self, colorString):
         for _ in range(8):
-            x = np.random.randint(0,14)
-            z = np.random.randint(0,14)
+            x = np.random.randint(0,10)
+            z = np.random.randint(0,10)
             name = 'Red'
             if colorString == 11:
                 name = 'Blue'
@@ -306,8 +265,8 @@ class AnimalAI(gym.Env):
     ###########################################################################
     def spawnCows(self):
         for _ in range(8):
-            x = np.random.randint(0,14)
-            z = np.random.randint(0,14)
+            x = np.random.randint(0,10)
+            z = np.random.randint(0,10)
             self.agent_host.sendCommand("chat {}".format('/summon minecraft:cow ' + str(x) + ' 4 ' + str(z)))
 
     ###########################################################################
@@ -315,48 +274,40 @@ class AnimalAI(gym.Env):
     ###########################################################################
     def step(self, action):
         ###################
-        ## CONTINUOUS
-        ###################
-        # action = [move, turn, hotbar, use]
-        # move
-        # self.agent_host.sendCommand('move ' + str(action[0]))
-
-        # # turn
-        # self.agent_host.sendCommand('turn ' + str(action[1]))
-
-        # # hotbar, if <= 0 press hotbar 1, if > 0 press hotbar 2
-        # if (action[2] <= 0):
-        #     self.agent_host.sendCommand('hotbar.1 1')
-        # else:
-        #     self.agent_host.sendCommand('hotbar.2 1')
-
-        # # use
-        # if (action[3] <= 0):
-        #     self.agent_host.sendCommand('use 0')
-        # else:
-        #     self.agent_host.sendCommand('use 1')
-        #
-        # # Give the agent time to execute the action
-        # time.sleep(0.3)
-
-        ###################
         ## DISCRETE
         ###################
         act = self.discrete_action_dict[action]
-        if act == 'use 1':
+        if act[0:4] == 'move' or act[0:6] == 'strafe':
+            # Center the agent on the block before moving
+            # This prevents the agent from getting pushed off by an animal and being unable to move
+            self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z))
+            time.sleep(0.1)
+            self.agent_host.sendCommand(act)
+            if act == 'move 1' and self.agent_z <= 10:
+                self.agent_z += 1
+            elif act == 'move -1' and self.agent_z >= 1:
+                self.agent_z -= 1
+            elif act == 'strafe -1' and self.agent_x <= 10:
+                self.agent_x += 1
+            elif act == 'strafe 1' and self.agent_x >= 1:
+                self.agent_x -= 1
+        elif act == 'use 1':
             self.agent_host.sendCommand(act)
             time.sleep(0.1)
             self.agent_host.sendCommand('use 0')
+            self.collect()
         elif act == 'turn 1' or act == 'turn -1':
             self.agent_host.sendCommand(act)
             time.sleep(0.25)
             self.agent_host.sendCommand('turn 0')
         else:
+            self.agent_host.sendCommand(act)
             if act == 'hotbar.1 1':
                 self.currentItem = 1
+                self.agent_host.sendCommand('hotbar.1 0')
             elif act == 'hotbar.2 1':
                 self.currentItem = 2
-            self.agent_host.sendCommand(act)
+                self.agent_host.sendCommand('hotbar.2 0')
         
         # Calculate reward
         reward = 0
@@ -393,9 +344,21 @@ class AnimalAI(gym.Env):
 
         return self.obs, reward, done, dict()
 
+    ###########################################################################
+    # Collect - Move 2 forwards and 2 back to collect use reward
+    ###########################################################################
+    def collect(self):
+        # 2 forward, 2 back
+        if (self.agent_z <= 8.5):
+            self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z + 1))
+            time.sleep(0.1)
+            self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z + 2))
+            time.sleep(0.3)
+            self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z))
+
 if __name__ == '__main__':
     ray.init()
-    trainer = dqn.DQNTrainer(env=AnimalAI, config={
+    trainer = ppo.PPOTrainer(env=AnimalAI, config={
         'env_config': {},           # No environment parameters to configure
         'framework': 'torch',       # Use pyotrch instead of tensorflow
         'num_gpus': 0,              # We aren't using GPUs
