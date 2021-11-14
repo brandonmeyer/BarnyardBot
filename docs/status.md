@@ -3,20 +3,20 @@ layout: default
 title: Status
 ---
 
-### Video
+## Video
 video here  
 
-### Project Summary
+## Project Summary
 summary here  
 
-### Approach
+## Approach
 approach here  
 
-### Evaluation
+## Evaluation
 eval here  
 
-### Remaining Goals and Challenges
+## Remaining Goals and Challenges
 goals/challenges here  
 
-### Resources used
+## Resources used
 resources here  
