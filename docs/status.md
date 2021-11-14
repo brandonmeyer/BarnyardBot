@@ -28,6 +28,8 @@ eval here
 [PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)\
 [Gym](https://gym.openai.com/)\
 [Malmo](https://www.microsoft.com/en-us/research/project/project-malmo/)\
+[Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
+[Malmo XML](https://microsoft.github.io/malmo/0.21.0/Schemas/MissionHandlers.html)\
 [Minecraft](https://www.minecraft.net/en-us/login)\
-[Reenforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
-
+[Reenforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)
+[CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
