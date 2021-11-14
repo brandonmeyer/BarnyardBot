@@ -55,8 +55,8 @@ class AnimalAI(gym.Env):
         # RLLib objects
         # Discrete action space
         self.action_space= Discrete(len(self.discrete_action_dict))
-        # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
-        self.observation_space = Box(low=0, high=np.array([2, 1]), dtype=np.float32)
+        # Observation space: 0=air,1=cow,2=red_sheep,3=blue_sheep
+        self.observation_space = Box(low=0, high=np.array([3, 1]), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -238,8 +238,10 @@ class AnimalAI(gym.Env):
         # Take line of sight and return what object is visible
         if los['type'] == 'Cow':
             obs[0] = 1
-        elif los['type'] == 'Red' or los['type'] == 'Blue':
+        elif los['type'] == 'Red':
             obs[0] = 2
+        elif los['type'] == 'Blue':
+            obs[0] = 3
         else:
             obs[0] = 0
 
