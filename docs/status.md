@@ -3,7 +3,6 @@ layout: default
 title: Status
 ---
 
-## Video
 video here  
 
 ## Project Summary
