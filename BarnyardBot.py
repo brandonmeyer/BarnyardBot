@@ -30,6 +30,9 @@ class AnimalAI(gym.Env):
         self.currentItem = 1
         self.agent_x = 5.5
         self.agent_z = 5.5
+        self.blueReward = 1
+        self.redReward = 1
+        self.milkReward = 1
         self.discrete_action_dict = {
             0: 'move 1',  # Move one block forward
             1: 'move -1',  # Move back
@@ -111,8 +114,8 @@ class AnimalAI(gym.Env):
                                 <ChatCommands />
                                 <InventoryCommands/>
                                 <RewardForCollectingItem>
-                                    <Item type="wool" colour="''' + str(self.targetWool) + '''" reward="1"/>
-                                    <Item type="wool" colour="RED" reward="1"/>
+                                    <Item type="wool" colour="BLUE" reward="''' + str(self.blueReward) + '''"/>
+                                    <Item type="wool" colour="RED" reward="''' + str(self.redReward) + '''"/>
                                 </RewardForCollectingItem>
                                 <ObservationFromFullStats/>
                                 <ObservationFromHotBar/>
@@ -325,7 +328,7 @@ class AnimalAI(gym.Env):
             obsJson = json.loads(obsText)
             if (obsJson['Hotbar_1_item'] == 'milk_bucket'):
                  # If the agent has milk, add a point and replace the bucket
-                reward += -1
+                reward += self.milkReward
                 self.agent_host.sendCommand("chat /replaceitem entity @p slot.hotbar.1 minecraft:bucket")
                 time.sleep(0.1) # Allow time for the item to be replaced (prevents scoring multiple points)
 
