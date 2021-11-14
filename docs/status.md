@@ -22,10 +22,11 @@ eval here
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Future challenges are mainly centered around player input for ratios. If the approach of using blocks to represent ratios is taken, the agent will need to spend more time learning for each run. This might also increase the time needed for each mission, because the agent needs enough time to learn from the increased observation space. One of the early challenges was having an observation space that was far too large, and it is possible for the grid to cause the same issue. A possible solution to this would be decreasing the size of the grid, but that limits the number of ratios that can be selected. If the chat option is taken for ratios, the challenge will be parsing out chat messages that are not related to adjusting BarnyardBot's policy. A possible solution would be adding a phrase to the start of every message, or whispering directly to BarnyardBot instead of typing in chat. Adding a new observation space for ratios will be time consuming because the agent will take longer to learn with each new option.
 
 ## Resources used
-[RLlib](https://docs.ray.io/en/latest/rllib.html)
-[Gym](https://gym.openai.com/)
-[Malmo](https://www.microsoft.com/en-us/research/project/project-malmo/)
-[Minecraft](https://www.minecraft.net/en-us/login)
-[PPO Algorithm Source](https://channel9.msdn.com/Events/Neural-Information-Processing-Systems-Conference/Neural-Information-Processing-Systems-Conference-NIPS-2016/Deep-Reinforcement-Learning-Through-Policy-Optimization)
-[Reenforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)
+[RLlib](https://docs.ray.io/en/latest/rllib.html)\
+[RLlib PPO](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
+[Gym](https://gym.openai.com/)\
+[Malmo](https://www.microsoft.com/en-us/research/project/project-malmo/)\
+[Minecraft](https://www.minecraft.net/en-us/login)\
+[PPO Algorithm Source](https://channel9.msdn.com/Events/Neural-Information-Processing-Systems-Conference/Neural-Information-Processing-Systems-Conference-NIPS-2016/Deep-Reinforcement-Learning-Through-Policy-Optimization)\
+[Reenforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
 
