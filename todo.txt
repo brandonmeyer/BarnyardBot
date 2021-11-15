@@ -4,6 +4,6 @@ IN PROGRESS
 - Write progress report/record video
 
 POST-REPORT
-- Add player input to alter agent behavior
+- Change txt file player input to alter agent behavior to in-game player input
 - Make presentation
 - Write final report
