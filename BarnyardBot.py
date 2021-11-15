@@ -55,8 +55,8 @@ class AnimalAI(gym.Env):
         # RLLib objects
         # Discrete action space
         self.action_space= Discrete(len(self.discrete_action_dict))
-        # Observation space: 0=air,1=cow,2=red_sheep,3=blue_sheep
-        self.observation_space = Box(low=0, high=np.array([3, 1]), dtype=np.float32)
+        # Observation space: 0=air,1=agent,2=cow,3=red_sheep,4=blue_sheep
+        self.observation_space = Box(low=0, high=np.array([2, 1]), dtype=np.float32)
 
     ###########################################################################
     # Return the mission XML with the current rewards
@@ -132,6 +132,9 @@ class AnimalAI(gym.Env):
     # Set up malmo mission
     ###########################################################################
     def initMalmo(self):
+        # Read the user input variables for ratios
+        self.readRatios()
+
         # Start the mission
         my_mission = MalmoPython.MissionSpec(self.getMissionXML(), True)
         my_mission_record = MalmoPython.MissionRecordSpec()
@@ -184,6 +187,8 @@ class AnimalAI(gym.Env):
         self.rewardList.append(self.totalReward)
         current_step = self.stepList[-1] if len(self.stepList) > 0 else 0
         self.stepList.append(current_step + self.totalSteps)
+
+        print('MISSION REWARD: ' + str(self.totalReward))
 
         self.totalReward = 0
         self.totalSteps = 0
@@ -238,10 +243,8 @@ class AnimalAI(gym.Env):
         # Take line of sight and return what object is visible
         if los['type'] == 'Cow':
             obs[0] = 1
-        elif los['type'] == 'Red':
+        elif los['type'] == 'Red' or los['type'] == 'Blue':
             obs[0] = 2
-        elif los['type'] == 'Blue':
-            obs[0] = 3
         else:
             obs[0] = 0
 
@@ -360,6 +363,29 @@ class AnimalAI(gym.Env):
             self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z + 2))
             time.sleep(0.3)
             self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z))
+
+    ###########################################################################
+    # Read Ratio Input From TXT
+    ###########################################################################
+    def readRatios(self):
+        lines = []
+        with open('ratio_input.txt') as f:
+            lines = f.readlines()
+        ratios = lines[2].strip().split(' ')
+        if ratios[0] == '0':
+            self.milkReward = -1
+        else:
+            self.milkReward = int(float(ratios[0]))
+        if ratios[1] == '0':
+            self.redReward = -1
+        else:
+            self.redReward = int(float(ratios[1]))
+        if ratios[2] == '0':
+            self.blueReward = -1
+        else:
+            self.blueReward = int(float(ratios[2]))
+        print(self.milkReward, self.redReward, self.blueReward)
+        f.close()
 
 if __name__ == '__main__':
     ray.init()
