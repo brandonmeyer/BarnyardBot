@@ -7,6 +7,8 @@ Brandon Meyer
 Adarsh Shankar  
 Jason Tran  
 <br />
+<img src="https://user-images.githubusercontent.com/51243475/141928275-c76d4621-5400-4c40-9dd3-e5db75b47644.png" alt="BarnyardBot Logo" width="500" height="281">
+
 ### What does BarnyardBot do?
 BarnyardBot is designed to use [Malmo](https://www.microsoft.com/en-us/research/project/project-malmo/) and [RLlib](https://docs.ray.io/en/latest/rllib.html) for reenforcement learning. When placed in a pen of sheep and cows, it automatically collects their resources. This gives the player freedom to explore their world, dig in the mines, or work on their newest build while the BarnyardBot agent gathers resources for them. With BarnyardBot, there is no need to spend time manually shearing sheep or milking cows!
 
