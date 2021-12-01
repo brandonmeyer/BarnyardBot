@@ -16,8 +16,8 @@ title: Final Report
 ## Evaluation
 
 ## References
-[Minecraft^1](https://www.minecraft.net/en-us/login)\
-[Sheep Wool Statistic^2](https://minecraft.fandom.com/wiki/Tutorials/Wool_farming)\
+[Minecraft<sup>1</sup>](https://www.minecraft.net/en-us/login)\
+[Sheep Wool Statistic<sup>2</sup>](https://minecraft.fandom.com/wiki/Tutorials/Wool_farming)\
 [RLlib](https://docs.ray.io/en/latest/rllib.html)\
 [RLlib PPO](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
 [PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)\
