@@ -24,7 +24,9 @@ title: Final Report
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The last approach used ‘ObservationFromGrid’ in the *Malmo* XML. With this approach, the program detects a grid of blocks placed by the player that represent the ratio. Each resource is represented by a different block, and the rewards and observations are adjusted accordingly. One challenge with this method is that the agent is constantly moving, so the observation grid has to be large. To fix this, we parsed the observation grid for the three types of blocks used and entered the appropriate ratio into the observation. Ultimately, we selected the chat observations as the method for taking player input. The .txt file was not selected because it requires the player to give input outside of the game and can cause errors, and the block approach was not selected because it is more work for the player and cannot be done from anywhere. The goal of this project is to make harvesting animal resources easier, and using chat messages proved to be the quickest option for the player, and can be done from anywhere on the *Minecraft* server.
 #### Algorithms
 <img width="680" alt="Flowchart from course resources" src="https://user-images.githubusercontent.com/51243475/144477747-d2b3154e-8617-426a-bf37-69fa4f768f54.png">  <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To determine the appropriate reinforcement learning algorithm for this project, we used the above flowchart<sup>7</sup> which was provided as a course resource. We mainly tested two algorithms, one for discrete action space and one for continuous action space. This is because when we were deciding between action spaces, we wanted to make sure that both spaces were using an appropriate algorithm. For discrete action spaces, we selected The algorithms used for BarnyardBot were off-the-shelf algorithms provided by RLlib.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To determine the appropriate reinforcement learning algorithm for this project, we used the above flowchart<sup>7</sup> which was provided as a course resource. We mainly tested two algorithms, one for discrete action space and one for continuous action space. This is because when we were deciding between action spaces, we wanted to make sure that both spaces were using an appropriate algorithm. For discrete action spaces, we selected the Proximal Policy Optimization (PPO) algorithm. We wanted the agent to be learning on-policy and we were not robust to hyperparameters. For continuous action spaces, we selected the Soft-Actor Critic (SAC) algorithm. Our environment was stochastic due to the random spawn locations and movements of animals, so SAC was the best fit. The algorithms used for BarnyardBot were off-the-shelf algorithms provided by RLlib.  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ultimately, we determined that the discrete action space and RLlib PPO algorithm<sup>8</sup> showed better improvement than the continuous action space and RLlib SAC algorithm<sup>9</sup>. This confirmed our belief that choosing a discrete action space for the given problem was more appropriate than a continuous action space. The update equation for the off-the-shelf PPO algorithm is based on the ratio of old and new policies, and is roughly as follows:\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$L^{CLIP}(\theta)=\hat{E_t}[min(r_t(\theta)\hat{A_t},clip(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A_t})]$$&nbsp;&nbsp;&nbsp;<sup>10</sup>
 
 - discrete vs continuous
 - observations from grid vs observationsf rom target
@@ -44,10 +46,14 @@ title: Final Report
 [Malmo XML<sup>6</sup>](https://microsoft.github.io/malmo/0.21.0/Schemas/MissionHandlers.html)\
 [Reinforcement Learning Algorithm Flowchart<sup>7</sup>](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
 [RLlib PPO<sup>8</sup>](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
-[PPO Algorithm Source<sup>9</sup>](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
+[RLlib SAC<sup>9</sup>](https://docs.ray.io/en/latest/rllib-algorithms.html#sac)\
+[PPO Algorithm Source<sup>10</sup>](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
 #### Other References
 [Writing 3x3 Letters in Minecraft (For Home Page/Video Image)](https://www.youtube.com/watch?v=vHExVqV-FD8)\
 [CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
 #### Useful Websites
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
 [Displaying Images Side by Side in GitHub](https://stackoverflow.com/questions/24319505/how-can-one-display-images-side-by-side-in-a-github-readme-md)
+
+
+
