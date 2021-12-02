@@ -5,7 +5,7 @@ title: Final Report
 ## BarnyardBot Video
 
 ## Project Summary
-<img src="https://user-images.githubusercontent.com/51243475/144334516-68004b17-8994-4385-a4c4-7a60bf262afb.png" alt="BarnyardBot Logo" width="425" height="300">  <br/>
+<img src="https://user-images.githubusercontent.com/51243475/144334516-68004b17-8994-4385-a4c4-7a60bf262afb.png" alt="Problem Image" width="425" height="300">  <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gathering animal resources is a crucial part of *Minecraft*<sup>1</sup> that can often be tedious. When a player wants milk or wool for baking a cake, healing status effects, making beds, or building a new colorful project, they must find the correct tools to use and then track down the respective animal for harvesting. On average, it takes a minute for a sheep's wool to grow back<sup>2</sup> in *Minecraft*. This means that most of the time, the player must wait for the cooldown to end if they need a specific color of wool from a specific sheep. This makes animal resource harvesting time consuming, and forces the player to sit around and wait instead of exploring the world, mining, or working on a new build.  <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BarnyardBot solves this problem by automating the animal resource harvesting process. With the power of reinforcement learning, BarnyardBot can navigate throughout the animal pen and harvest resources for the player. The player can specify whether they need milk, a certain color of wool, or a ratio of resources. BaryardBot collects the requested items and gives the player more free time, removing the needs to sit around and wait for cooldowns or chase around animals. This gives the player more time to explore the world, go mining for precious stones, cook food, or build their next work of art.  <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BarnyardBot takes the agent's current target and the player's requests as input and determines the current best solution for meeting the player's requests. For example, if the player only wants milk and does not want wool, BarnyardBot will find cows to milk and ignore the sheep it comes across. Taking the player's requests is important for solving the animal resource harvesting problem because the player won't always need every resource. BarnyardBot aims to use this information to harvest resources as efficiently and accurately as possible. If the player only needs a certain color of wool for a build, BarnyardBot won't waste time collecting other colors. Whenever the player wants a different resource, they can tell BarnyardBot and it will adjust accordingly. This prevents the player from needing multiple bots to perform a similar task, since BarnyardBot can harvest whatever they need from sheep and cows. The goal of this project is to maximize resource output in *Minecraft* using *Malmo*<sup>3</sup> and *RLlib*<sup>4</sup>, with the output based on the requests of the player.
@@ -23,6 +23,8 @@ title: Final Report
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Another approach involved using ‘ObservationFromChat’ in the *Malmo* XML. With this approach, the program reads any chat messages in the format ‘!RATIO m:r:b’ and adjusts the observations and rewards accordingly. This approach is useful because it allows the player to adjust the agent’s current goals from inside of *Minecraft*, rather than having to edit a file in a separate program. One of the issues with this approach was that *Malmo* occasionally misses chat messages, as is explained in the *Malmo* XML. To combat this, the agent sends a chat command saying ‘Ratio m:r:b accepted, and will be used starting in the next mission’ whenever a chat message is successfully read. If the agent doesn’t respond, the player knows that they have to send the chat message again. Sometimes it can take 3 or so tries before the observation is triggered by *Malmo*.  <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The last approach used ‘ObservationFromGrid’ in the *Malmo* XML. With this approach, the program detects a grid of blocks placed by the player that represent the ratio. Each resource is represented by a different block, and the rewards and observations are adjusted accordingly. One challenge with this method is that the agent is constantly moving, so the observation grid has to be large. To fix this, we parsed the observation grid for the three types of blocks used and entered the appropriate ratio into the observation. Ultimately, we selected the chat observations as the method for taking player input. The .txt file was not selected because it requires the player to give input outside of the game and can cause errors, and the block approach was not selected because it is more work for the player and cannot be done from anywhere. The goal of this project is to make harvesting animal resources easier, and using chat messages proved to be the quickest option for the player, and can be done from anywhere on the *Minecraft* server.
 #### Algorithms
+<img width="680" alt="Flowchart from course resources" src="https://user-images.githubusercontent.com/51243475/144477747-d2b3154e-8617-426a-bf37-69fa4f768f54.png">  <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To determine the appropriate reinforcement learning algorithm for this project, we used the above flowchart<sup>7</sup> which was provided as a course resource. We mainly tested two algorithms, one for discrete action space and one for continuous action space. This is because when we were deciding between action spaces, we wanted to make sure that both spaces were using an appropriate algorithm. For discrete action spaces, we selected The algorithms used for BarnyardBot were off-the-shelf algorithms provided by RLlib.
 
 - discrete vs continuous
 - observations from grid vs observationsf rom target
@@ -32,6 +34,7 @@ title: Final Report
 ## Evaluation
 
 ## References
+
 #### Report References
 [Minecraft<sup>1</sup>](https://www.minecraft.net/en-us/login)\
 [Sheep Wool Statistic<sup>2</sup>](https://minecraft.fandom.com/wiki/Tutorials/Wool_farming)\
@@ -39,14 +42,12 @@ title: Final Report
 [RLlib<sup>4</sup>](https://docs.ray.io/en/latest/rllib.html)\
 [Gym<sup>5</sup>](https://gym.openai.com/)\
 [Malmo XML<sup>6</sup>](https://microsoft.github.io/malmo/0.21.0/Schemas/MissionHandlers.html)\
-[PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
+[Reinforcement Learning Algorithm Flowchart<sup>7</sup>](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
+[RLlib PPO<sup>8</sup>](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
+[PPO Algorithm Source<sup>9</sup>](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
 #### Other References
-[RLlib PPO](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
 [Writing 3x3 Letters in Minecraft (For Home Page/Video Image)](https://www.youtube.com/watch?v=vHExVqV-FD8)\
 [CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
 #### Useful Websites
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
-[Reinforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
 [Displaying Images Side by Side in GitHub](https://stackoverflow.com/questions/24319505/how-can-one-display-images-side-by-side-in-a-github-readme-md)
-
-
