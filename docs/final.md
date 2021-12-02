@@ -30,7 +30,19 @@ The off-the-shelf PPO algorithm in combination with the discrete action space, l
 
 ## Evaluation
 #### Quantitative
+Average Reward over Time
+Milk only entire time
+Wool only entire time
+1:1:1
+Ratio change part way through, and changing back
+Ratio Accuracy
+2:1:0 more milk than wool
+1:2:0 more wool than milk
+2:1:1 equal milk and wool but spread out
 #### Qualitative
+Reasonable amount of resources collected?
+Would this be useful for a player?
+Does switching ratios work?
 
 ## References
 
