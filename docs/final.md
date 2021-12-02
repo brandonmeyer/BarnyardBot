@@ -11,6 +11,9 @@ title: Final Report
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BarnyardBot takes the agent's current target and the player's requests as input and determines the current best solution for meeting the player's requests. For example, if the player only wants milk and does not want wool, BarnyardBot will find cows to milk and ignore the sheep it comes across. Taking the player's requests is important for solving the animal resource harvesting problem because the player won't always need every resource. BarnyardBot aims to use this information to harvest resources as efficiently and accurately as possible. If the player only needs a certain color of wool for a build, BarnyardBot won't waste time collecting other colors. Whenever the player wants a different resource, they can tell BarnyardBot and it will adjust accordingly. This prevents the player from needing multiple bots to perform a similar task, since BarnyardBot can harvest whatever they need from sheep and cows. The goal of this project is to maximize resource output in *Minecraft* using *Malmo*<sup>3</sup> and *RLlib*<sup>4</sup>, with the output based on the requests of the player.
 
 ## Approaches
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BarnyardBot uses reinforcement learning through *RLlib*, *Gym*<sup>5</sup>, and *Malmo* to adjust agent behavior in *Minecraft* for harvesting resources. When creating the first baseline for the project, the most important details were how the agent would observe its environment (the observation space) and how the agent would perform its actions (the action space).
+
+- discrete vs continuous
 - observations from grid vs observationsf rom target
 - three approaches to ratios: text, chat, blocks
 
@@ -21,9 +24,9 @@ title: Final Report
 [Sheep Wool Statistic<sup>2</sup>](https://minecraft.fandom.com/wiki/Tutorials/Wool_farming)\
 [Malmo<sup>3</sup>](https://www.microsoft.com/en-us/research/project/project-malmo/)\
 [RLlib<sup>4</sup>](https://docs.ray.io/en/latest/rllib.html)\
+[Gym<sup>4</sup>](https://gym.openai.com/)\
 [RLlib PPO](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
 [PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)\
-[Gym](https://gym.openai.com/)\
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
 [Malmo XML](https://microsoft.github.io/malmo/0.21.0/Schemas/MissionHandlers.html)\
 [Writing 3x3 Letters in Minecraft (For Home Page/Video Image)](https://www.youtube.com/watch?v=vHExVqV-FD8)\
