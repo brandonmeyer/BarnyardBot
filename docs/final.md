@@ -2,7 +2,7 @@
 layout: default
 title: Final Report
 ---
-## Video Here
+## BarnyardBot Video
 
 ## Project Summary
 <img src="https://user-images.githubusercontent.com/51243475/144334516-68004b17-8994-4385-a4c4-7a60bf262afb.png" alt="BarnyardBot Logo" width="425" height="300">
