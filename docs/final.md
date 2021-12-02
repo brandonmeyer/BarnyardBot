@@ -39,11 +39,11 @@ title: Final Report
 [RLlib<sup>4</sup>](https://docs.ray.io/en/latest/rllib.html)\
 [Gym<sup>5</sup>](https://gym.openai.com/)\
 [Malmo XML<sup>6</sup>](https://microsoft.github.io/malmo/0.21.0/Schemas/MissionHandlers.html)\
-[PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)\
+[PPO Algorithm Source](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
 #### Other References
 [RLlib PPO](https://docs.ray.io/en/latest/rllib-algorithms.html#ppo)\
 [Writing 3x3 Letters in Minecraft (For Home Page/Video Image)](https://www.youtube.com/watch?v=vHExVqV-FD8)\
-[CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)\
+[CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
 #### Useful Websites
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
 [Reinforcement Learning Algorithm Flowchart](https://static.us.edusercontent.com/files/eS20DbiGQfi4P2skbCN9WYeD)\
