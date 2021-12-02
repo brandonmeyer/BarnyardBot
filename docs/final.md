@@ -25,7 +25,7 @@ title: Final Report
 #### Algorithms
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To determine the appropriate reinforcement learning algorithm for this project, we used an algorithm flowchart<sup>7</sup> which was provided as a course resource. We mainly tested two algorithms, one for discrete action space and one for continuous action space. This is because when we were deciding between action spaces, we wanted to make sure that both spaces were using an appropriate algorithm. For discrete action spaces, we selected the Proximal Policy Optimization (PPO) algorithm. We wanted the agent to be learning on-policy and we were not robust to hyperparameters. For continuous action spaces, we selected the Soft-Actor Critic (SAC) algorithm. Our environment was stochastic due to the random spawn locations and movements of animals, so SAC was the best fit. The algorithms used for BarnyardBot were off-the-shelf algorithms provided by RLlib.  <br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ultimately, we determined that the discrete action space and RLlib PPO algorithm<sup>8</sup> showed better improvement than the continuous action space and RLlib SAC algorithm<sup>9</sup>. This confirmed our belief that choosing a discrete action space for the given problem was more appropriate than a continuous action space. The update equation for the off-the-shelf PPO algorithm is based on the ratio of old and new policies, and is roughly as follows:\
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$L^{CLIP}(\theta)=\hat{E_t}[min(r_t(\theta)\hat{A_t},clip(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A_t})]$$&nbsp;&nbsp;&nbsp;<sup>10</sup>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$L^{CLIP}(\theta)=\hat{E_t}[min(r_t(\theta)\hat{A_t},clip(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A_t})]$$&nbsp;&nbsp;&nbsp;<sup>10</sup>  <br/>
 The off-the-shelf PPO algorithm in combination with the discrete action space, line of sight observation space, and ratios added to the observation space resulted in a model that could show improvement after a few hours of learning the current ratio. With this approach as the final choice, we were able to experiment with changing ratios during the missions and evaluate the resulting data.
 
 ## Evaluation
@@ -50,3 +50,6 @@ The off-the-shelf PPO algorithm in combination with the discrete action space, l
 [CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
 [Displaying Images Side by Side in GitHub](https://stackoverflow.com/questions/24319505/how-can-one-display-images-side-by-side-in-a-github-readme-md)
+
+
+
