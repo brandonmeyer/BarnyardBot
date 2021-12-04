@@ -30,6 +30,16 @@ The off-the-shelf PPO algorithm in combination with the discrete action space, l
 
 ## Evaluation
 #### Quantitative
+<p float=left>
+  <img src="https://user-images.githubusercontent.com/51243475/141702221-252f1a85-ed36-4342-899f-e2ef6647baf4.png" alt="Milk Only" width="300" height="220">
+  <img src="https://user-images.githubusercontent.com/51243475/141702224-9894a05a-2b22-4b2a-b3d3-3541ed599539.png" alt="Wool Only" width="300" height="220">
+  <img src="https://user-images.githubusercontent.com/51243475/141702227-fa5cf5e6-7ab8-4fb0-8e2e-1e9ae1ee0286.png" alt="Equal of All" width="300" height="220">
+</p>
+
+<p float=left>
+  <img src="https://user-images.githubusercontent.com/51243475/144723703-10c345d3-11f8-4c69-89b2-8bdf8b8a00bf.png" alt="1:0:0 Ratio Resources" width="300" height="220">
+  <img src="https://user-images.githubusercontent.com/51243475/144723701-c6321885-442a-4e55-9c04-63bf487d1c19.png" alt="0:1:1 Ratio Resources" width="300" height="220">
+</p>
 Average Reward over Time
 Milk only entire time
 Wool only entire time
@@ -63,6 +73,3 @@ Does switching ratios work?
 [CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
 [Displaying Images Side by Side in GitHub](https://stackoverflow.com/questions/24319505/how-can-one-display-images-side-by-side-in-a-github-readme-md)
-
-
-
