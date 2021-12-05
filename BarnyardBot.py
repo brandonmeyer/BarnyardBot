@@ -145,8 +145,6 @@ class AnimalAI(gym.Env):
     # Set up malmo mission
     ###########################################################################
     def initMalmo(self):
-        # Read the user input variables for ratios from txt file
-        # self.readRatios()
         self.setRatios()
 
         # Start the mission
@@ -458,29 +456,6 @@ class AnimalAI(gym.Env):
             self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z + 2))
             time.sleep(0.3)
             self.agent_host.sendCommand('tp ' + str(self.agent_x) + ' 4 ' + str(self.agent_z))
-
-    ###########################################################################
-    # Read Ratio Input From TXT
-    ###########################################################################
-    def readRatios(self):
-        lines = []
-        with open('ratio_input.txt') as f:
-            lines = f.readlines()
-        ratios = lines[2].strip().split(' ')
-        if ratios[0] == '0':
-            self.milkReward = -1
-        else:
-            self.milkReward = int(float(ratios[0]))
-        if ratios[1] == '0':
-            self.redReward = -1
-        else:
-            self.redReward = int(float(ratios[1]))
-        if ratios[2] == '0':
-            self.blueReward = -1
-        else:
-            self.blueReward = int(float(ratios[2]))
-        print(self.milkReward, self.redReward, self.blueReward)
-        f.close()
 
     ###########################################################################
     # Set Ratios
