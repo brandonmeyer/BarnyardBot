@@ -1,9 +1,4 @@
 TODO LIST
-
-IN PROGRESS
-- Write progress report/record video
-
-POST-REPORT
-- Change txt file player input to alter agent behavior to in-game player input
-- Make presentation
-- Write final report
+- Finalize ratios
+- Finalize report
+- Create final video
