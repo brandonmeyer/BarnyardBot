@@ -436,7 +436,7 @@ class AnimalAI(gym.Env):
                 hotbItem = "Hotbar_{num}_item".format(num=h)
                 hotbColr = "Hotbar_{num}_colour".format(num=h)
                 hotbSize = "Hotbar_{num}_size".format(num=h)
-                hotbSlot = "slot.hotbar{num}".format(num=h)
+                hotbSlot = "slot.hotbar.{num}".format(num=h)
                 if obsJson[hotbItem] == "wool":
                     wool_color = obsJson[hotbColr] 
                     wool_amount = obsJson[hotbSize] 
