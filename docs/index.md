@@ -26,6 +26,6 @@ Reports:
 
 - [Proposal](proposal.html)
 - [Status](status.html)
-- [Final](final.html) COMING SOON
+- [Final](final.html)
 
 Office Hours Meeting: October 21 at 7:30pm on [Zoom](https://uci.zoom.us/j/98620593830)
