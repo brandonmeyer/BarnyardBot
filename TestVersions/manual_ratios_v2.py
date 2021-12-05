@@ -448,8 +448,7 @@ class AnimalAI(gym.Env):
                     if wool_color == "BLUE":
                         print("Found BLUE Wool!")
                         reward += self.blueReward 
-                        self.resourceCounter[2] += wool_amount 
-                        self.agent_host.sendCommand("swapInventoryItems " + str(h) + " 10")
+                        self.resourceCounter[2] += wool_amount
                         self.agent_host.sendCommand("chat /replaceitem entity @p "+hotbSlot+" minecraft:air")
                     time.sleep(0.1)
 
