@@ -77,6 +77,7 @@ The positive slope in the graphs and values for difference in average points sco
 [RLlib SAC<sup>9</sup>](https://docs.ray.io/en/latest/rllib-algorithms.html#sac)\
 [PPO Algorithm Source<sup>10</sup>](https://blogs.oracle.com/ai-and-datascience/post/reinforcement-learning-proximal-policy-optimization-ppo)
 #### Other References
+[UCI Minecraft Server (used in video)](https://sites.uci.edu/minecraft/)\
 [Writing 3x3 Letters in Minecraft (For Home Page/Video Image)](https://www.youtube.com/watch?v=vHExVqV-FD8)\
 [CS175 Assignment 2 for understanding of RLlib/Gym](https://canvas.eee.uci.edu/courses/40175/files/folder/assignment2?preview=16066666)\
 [Malmo Gitter Chat](https://gitter.im/Microsoft/malmo?at=578aa4fd3cb52e8b24cee1af)\
