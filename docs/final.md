@@ -2,7 +2,8 @@
 layout: default
 title: Final Report
 ---
-## BarnyardBot Video
+## Final Report Video
+<iframe width="720" height="405" src="https://www.youtube.com/embed/Pqerg-Vj71I" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Project Summary
 <img src="https://user-images.githubusercontent.com/51243475/144334516-68004b17-8994-4385-a4c4-7a60bf262afb.png" alt="Problem Image" width="425" height="300">  <br/>
