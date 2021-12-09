@@ -32,7 +32,7 @@ title: Final Report
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$L^{CLIP}(\theta)=\hat{E_t}[min(r_t(\theta)\hat{A_t},clip(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A_t})]$$&nbsp;&nbsp;&nbsp;<sup>10</sup>  <br/>
 The off-the-shelf PPO algorithm in combination with the discrete action space, line of sight observation space, and ratios added to the observation space resulted in a model that could show improvement after a few hours of learning the current ratio.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HYPERPARAMETERS GO HERE<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;With this approach as the final choice, we were able to experiment with changing ratios during the missions and evaluate the resulting data.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;With the *RLlib* PPO algorithm as the final choice, we were able to experiment with changing ratios during the missions and evaluate the resulting data.
 
 ## Evaluation
 #### Quantitative
